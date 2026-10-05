@@ -1,0 +1,3 @@
+PROVIDER=qwen38-cloudrun
+MODEL=qwen3.8-27b-nvfp4-bf16-lmhead
+THINKING=off

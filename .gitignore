@@ -1,0 +1,28 @@
+# Internal agent scratch, local probe output, and private session work
+agent/tmp/
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_rsa.pub
+
+# Dependencies and generated artifacts
+node_modules/
+dist/
+build/
+coverage/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+
+# Logs and operating-system artifacts
+*.log
+.DS_Store
+Thumbs.db

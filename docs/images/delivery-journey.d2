@@ -1,0 +1,47 @@
+direction: right
+title: The 4-Gate Delivery Journey {near: top-center}
+
+G1: "1. EXPLORE\n(Scope & Needs)" {
+  shape: step
+  style.fill: "#e0f2fe"
+  style.stroke: "#0284c7"
+  mode: "read-only"
+  tool: "gate-check.sh"
+}
+
+G2: "2. CONCEPT\n(Spec & Deliberate)" {
+  shape: step
+  style.fill: "#fef3c7"
+  style.stroke: "#d97706"
+  mode: "spec-writes only"
+  tool: "gate-review.sh concept\ngate-check.sh --preflight"
+}
+
+G3: "3. IMPLEMENT\n(TDD Slices)" {
+  shape: step
+  style.fill: "#dcfce7"
+  style.stroke: "#16a34a"
+  mode: "editable TDD"
+  tool: "gate-review.sh diff\nprecommit.sh"
+}
+
+G4: "4. SHIP\n(Review & Merge)" {
+  shape: step
+  style.fill: "#f3e8ff"
+  style.stroke: "#9333ea"
+  mode: "read-only review"
+  tool: "gate-review.sh peer/sheldon\ngate-merge.sh"
+}
+
+G1 -> G2: "Scope Grounded"
+G2 -> G3: "Human Go-Ahead"
+G3 -> G4: "Proof Presented"
+G4 -> Main: "Merge & Land" {
+  style.stroke: "#16a34a"
+  style.stroke-width: 2
+}
+
+Main: "main (verified SHA)" {
+  shape: cylinder
+  style.fill: "#f1f5f9"
+}
