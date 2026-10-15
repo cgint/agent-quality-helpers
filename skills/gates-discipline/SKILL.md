@@ -13,6 +13,8 @@ This skill teaches agents how to navigate software changes and knowledge-work th
 
 Within a phase, iterate, explore, spike, and test freely. At gate boundaries, work stops until exit criteria (verifiable evidence + required human confirmations) are completely fulfilled and recorded in `GATES_<task>.md`.
 
+All `scripts/gate-*.sh` commands below resolve relative to this skill's own directory (Pi injects the skill's base path for bundled scripts), not the current working directory — so the discipline works in any project the skill is installed into, without copying the scripts separately.
+
 ---
 
 ## When to Consult This Skill (The 7 Triggers)
@@ -42,8 +44,8 @@ Within a phase, iterate, explore, spike, and test freely. At gate boundaries, wo
 
 ### Gate 1 — Explore & Understand Requirements
 - **Entry Protocol:**
-  - Workspace: Target branch anchored. (Optional worktree isolation check: `./gate-check.sh --worktree <target>`)
-  - Mode: strictly `readonly`. Preflight: `./gate-check.sh --preflight 1 readonly`
+  - Workspace: Target branch anchored. (Optional worktree isolation check: `scripts/gate-check.sh --worktree <target>`)
+  - Mode: strictly `readonly`. Preflight: `scripts/gate-check.sh --preflight 1 readonly`
   - Companion Skills: `openspec-explore`, `codebase-search`, `web-search` (or standard codebase scouting skills)
 - **Fluid Phase:** Read code, inspect configurations, run tests in read-only mode, formulate scope and non-goals.
 - **Exit Criteria:**
@@ -54,17 +56,17 @@ Within a phase, iterate, explore, spike, and test freely. At gate boundaries, wo
 - **Entry Protocol:**
   - Preconditions: Gate 1 passed in ledger.
   - Mode: strictly `readonly` for application code; write access restricted to specification folder (e.g. `openspec/changes/<name>/` or `docs/`).
-  - Preflight: `./gate-check.sh --preflight 2 readonly`
+  - Preflight: `scripts/gate-check.sh --preflight 2 readonly`
   - Companion Skills: `openspec-propose`, `criticalthink`, `socratic-first-principles`
 - **Fluid Phase:** Author proposal, specs, and tasks. Deliberate edge cases, failure modes, and anti-goals. Label uncertainties (`[unverified]`).
 - **Exit Criteria:**
-  - `./gate-review.sh concept <path/to/spec>` exits `0` (verifies explicit non-goals, bounds, epistemic markers).
+  - `scripts/gate-review.sh concept <path/to/spec>` exits `0` (verifies explicit non-goals, bounds, epistemic markers).
   - **Human "Go-Ahead":** Explicit human permission to start coding recorded with timestamp in ledger.
 
 ### Gate 3 — Test-Driven Implementation
 - **Entry Protocol:**
   - Preconditions: Gate 2 passed and human go-ahead recorded.
-  - Mode: `editable`. Preflight: `./gate-check.sh --preflight 3 editable`
+  - Mode: `editable`. Preflight: `scripts/gate-check.sh --preflight 3 editable`
   - Write Scope: Narrowest directory tree required for the slice (`launch cwd = write scope`).
   - Companion Skills: `openspec-apply-change`
 - **Fluid Phase:**
@@ -72,7 +74,7 @@ Within a phase, iterate, explore, spike, and test freely. At gate boundaries, wo
   - Slicing: work through task groups sequentially; verify each slice before advancing.
 - **Exit Criteria (Agent DoD):**
   - All specification tasks checked `[x]` with evidence.
-  - `./gate-review.sh diff HEAD` exits `0` (runs `./precommit.sh` and asserts tests were added/updated).
+  - `scripts/gate-review.sh diff HEAD` exits `0` (runs the consuming project's own `./precommit.sh`, if present, and asserts tests were added/updated).
   - Present proof summary to human ➔ **STOP** (agents strictly forbidden from merging or ticking user sign-offs).
 
 ### Gate 4 — Review, Sign-off, & Merge to Main
@@ -81,12 +83,12 @@ Within a phase, iterate, explore, spike, and test freely. At gate boundaries, wo
   - Mode: `readonly` (merge execution only).
   - Companion Skills: `gitlab-mr-workflow`
 - **Fluid Phase:**
-  - Branch hygiene check: `./gate-review.sh peer` (checks upstream branch and unpushed commits).
-  - Automated Peer Review: `./gate-review.sh sheldon <mr-iid>` (or peer reviewer pass).
-  - Review Freshness: `./gate-review.sh verify-freshness <record>` (fails if branch HEAD moved since review).
+  - Branch hygiene check: `scripts/gate-review.sh peer` (checks upstream branch and unpushed commits).
+  - Automated Peer Review: `scripts/gate-review.sh sheldon <mr-iid>` (or peer reviewer pass).
+  - Review Freshness: `scripts/gate-review.sh verify-freshness <record>` (fails if branch HEAD moved since review).
 - **Exit Criteria:**
   - Human reviews proof, marks acceptance (`[User Verification]`), and commands merge.
-  - Atomic Landing: `./gate-merge.sh merge <mr-iid> [--allow-dirty] [--inflight "<paths>"]`.
+  - Atomic Landing: `scripts/gate-merge.sh merge <mr-iid> [--allow-dirty] [--inflight "<paths>"]`.
   - Confirm squash-merged commit on remote `main` and clean workspace switch to `main`.
 
 ---
@@ -95,15 +97,15 @@ Within a phase, iterate, explore, spike, and test freely. At gate boundaries, wo
 
 | Gate | Purpose | Command |
 |---|---|---|
-| **Any** | Verify ledger state & preflight worker mode | `./gate-check.sh --preflight <gate> <mode>` |
-| **Any** | Verify current git worktree anchor | `./gate-check.sh --worktree <expected-name>` |
-| **Gate 2** | Audit proposal bounds & non-goals | `./gate-review.sh concept <proposal.md>` |
-| **Gate 3** | Precommit & TDD diff verification | `./gate-review.sh diff HEAD` |
-| **Gate 4** | Branch hygiene & unpushed check | `./gate-review.sh peer` |
-| **Gate 4** | Automated bot interaction (@ai-sheldon) | `./gate-review.sh sheldon <mr-iid>` |
-| **Gate 4** | Assert review SHA matches current HEAD | `./gate-review.sh verify-freshness <record.md>` |
-| **Gate 4** | Dry-run merge check (zero mutations) | `./gate-merge.sh check <mr-iid>` |
-| **Gate 4** | Atomic squash-merge & workspace reset | `./gate-merge.sh merge <mr-iid> --inflight "<files>"` |
+| **Any** | Verify ledger state & preflight worker mode | `scripts/gate-check.sh --preflight <gate> <mode>` |
+| **Any** | Verify current git worktree anchor | `scripts/gate-check.sh --worktree <expected-name>` |
+| **Gate 2** | Audit proposal bounds & non-goals | `scripts/gate-review.sh concept <proposal.md>` |
+| **Gate 3** | Precommit & TDD diff verification | `scripts/gate-review.sh diff HEAD` |
+| **Gate 4** | Branch hygiene & unpushed check | `scripts/gate-review.sh peer` |
+| **Gate 4** | Automated bot interaction (@ai-sheldon) | `scripts/gate-review.sh sheldon <mr-iid>` |
+| **Gate 4** | Assert review SHA matches current HEAD | `scripts/gate-review.sh verify-freshness <record.md>` |
+| **Gate 4** | Dry-run merge check (zero mutations) | `scripts/gate-merge.sh check <mr-iid>` |
+| **Gate 4** | Atomic squash-merge & workspace reset | `scripts/gate-merge.sh merge <mr-iid> --inflight "<files>"` |
 
 ---
 
@@ -131,7 +133,7 @@ Agents must update this block upon passing each gate. Never invent intermediate 
 
 ### A. Herdr Multi-Agent Runtime (`sub-agent-herdr-supervisor` + `sub-agent-handoff`)
 When operating with a Herdr / tmux control plane:
-1. Run `./gate-check.sh --preflight <gate> <mode>` before calling `herdr-start-subagent.sh`.
+1. Run `scripts/gate-check.sh --preflight <gate> <mode>` before calling `herdr-start-subagent.sh`.
 2. Enforce **`launch cwd = write scope`**: Launch workers in the narrowest directory containing all their authorized writes and report path.
 3. Supervisor retains mandatory responsibility for child pane cleanup upon worker completion.
 4. Workers never execute `gate-merge.sh` or tick human acceptance boxes.
@@ -139,7 +141,7 @@ When operating with a Herdr / tmux control plane:
 ### B. Solo / Direct Session Runtime
 When working as a single agent in a direct terminal or non-Herdr environment:
 1. Honor phase modes internally: treat Gate 1 and Gate 2 as read-only / spec-only.
-2. Run `./gate-review.sh` commands directly in the repository root.
+2. Run `scripts/gate-review.sh` commands directly in the repository root.
 3. Stop at Gate 3 and Gate 4 exit boundaries for explicit human instructions.
 
 ---
@@ -150,5 +152,5 @@ If an unexpected finding during Gate 3 or Gate 4 invalidates a specification or 
 1. **STOP coding immediately.** Do not patch requirement gaps with ad-hoc code hacks.
 2. Update the ledger: set `current_gate: 2` and state the regression reason.
 3. Amend the specification document.
-4. Run `./gate-review.sh concept <spec>` until green.
+4. Run `scripts/gate-review.sh concept <spec>` until green.
 5. Re-acquire explicit human "go-ahead" before resuming Gate 3 implementation.

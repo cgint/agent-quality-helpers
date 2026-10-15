@@ -65,6 +65,7 @@ Pi agent in a project
 | **`gate-merge.sh`** | **Gate 4** | Implemented (v2) | `gate-merge.sh` | Fail-fast ancestor check, precommit, squash-merge, `--inflight` check & landing |
 | **`gate-check.sh`** | **Gates 1–4** | Implemented (v2) | `gate-check.sh` | Parses fenced YAML ledger state, `--preflight` mode/gate validator, `--worktree` anchor |
 | **`gate-review.sh`** | **Gates 1–4** | Implemented (v2) | `gate-review.sh` | `--concept`, `--diff`, `--grounding`, `--peer`, `--sheldon`, and `--verify-freshness` |
+| **`gates-discipline` Skill + Package** | All Gates | Implemented | `skills/gates-discipline/` + `package.json` | Self-contained skill: single flat `SKILL.md` (all 4 gate contracts, tooling matrix, ledger format, runtime bindings, regression protocol inline) + bundled `scripts/` copies of `gate-*.sh` for portability, guarded by `verify-script-parity.sh` against drift; `pi-deliberation-companion` is installable as a skills-only Pi package |
 
 ---
 
