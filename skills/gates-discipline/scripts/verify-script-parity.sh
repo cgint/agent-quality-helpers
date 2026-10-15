@@ -20,7 +20,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 DRIFTED=0
-for name in gate-check.sh gate-review.sh gate-merge.sh; do
+for name in gate-check.sh gate-review.sh gate-merge.sh openspec-audit.sh; do
   root_file="$REPO_ROOT/$name"
   bundled_file="$SCRIPT_DIR/$name"
   if ! diff -q "$root_file" "$bundled_file" > /dev/null 2>&1; then
