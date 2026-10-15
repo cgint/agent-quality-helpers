@@ -13,7 +13,7 @@ This skill teaches agents how to navigate software changes and knowledge-work th
 
 **ABSOLUTELY FORBIDDEN: moving to a subsequent gate before the current gate's exit criteria are fulfilled.** Every exit criterion — verifiable evidence *and* required human confirmations — must exist and be recorded in the task ledger before any work of the next gate begins. This binds the lead agent and every subagent. There are no soft transitions, no carrying work across a gate "to finish later", and no worker may start later-gate work "in parallel". Within a phase, iterate freely (review ➔ fix ➔ re-validate; slice ➔ test ➔ re-slice). Transitions forward are criteria-gated; the only way backward is a **deliberate gate regression**, reopening the earlier gate and its evidence.
 
-All `scripts/gate-*.sh` commands below resolve relative to this skill's own directory (Pi injects the skill's base path for bundled scripts), not the current working directory — so the discipline works in any project the skill is installed into, without copying the scripts separately.
+All `scripts/gate-*.sh` commands below resolve relative to this skill's own directory (Pi injects the skill's base path for bundled scripts), not the current working directory — so the discipline works in any project the skill is installed into, without copying the scripts separately. The same applies to `assets/GATES_TEMPLATE.md`: it lives next to `SKILL.md` in the skill folder and is resolved against the skill's absolute path as Pi provides it.
 
 ---
 
