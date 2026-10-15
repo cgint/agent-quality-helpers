@@ -11,7 +11,7 @@ This skill teaches agents how to navigate software changes and knowledge-work th
 
 > **The Invariant: Phases are fluid; Gates are binding.**
 
-Within a phase, iterate, explore, spike, and test freely. At gate boundaries, work stops until exit criteria (verifiable evidence + required human confirmations) are completely fulfilled and recorded in `GATES_<task>.md`.
+**ABSOLUTELY FORBIDDEN: moving to a subsequent gate before the current gate's exit criteria are fulfilled.** Every exit criterion — verifiable evidence *and* required human confirmations — must exist and be recorded in the task ledger before any work of the next gate begins. This binds the lead agent and every subagent. There are no soft transitions, no carrying work across a gate "to finish later", and no worker may start later-gate work "in parallel". Within a phase, iterate freely (review ➔ fix ➔ re-validate; slice ➔ test ➔ re-slice). Transitions forward are criteria-gated; the only way backward is a **deliberate gate regression**, reopening the earlier gate and its evidence.
 
 All `scripts/gate-*.sh` commands below resolve relative to this skill's own directory (Pi injects the skill's base path for bundled scripts), not the current working directory — so the discipline works in any project the skill is installed into, without copying the scripts separately.
 
@@ -19,7 +19,7 @@ All `scripts/gate-*.sh` commands below resolve relative to this skill's own dire
 
 ## When to Consult This Skill (The 7 Triggers)
 
-1. **Task Inception & Cold Start:** Instantiating `GATES_<task>.md` and anchoring the worktree/branch.
+1. **Task Inception & Cold Start:** Copy `assets/GATES_TEMPLATE.md` to instantiate `GATES_<task>.md` and anchor the worktree/branch.
 2. **Before Delegating to Subagents:** Checking preflight modes (`readonly` vs `editable`) and write scopes.
 3. **Approaching a Gate Boundary:** Verifying mechanical exit proofs (`gate-review.sh`) before advancing.
 4. **Temptation to Code Early:** Epistemic firewall against modifying application code at Gate 1 or Gate 2.
@@ -106,6 +106,17 @@ All `scripts/gate-*.sh` commands below resolve relative to this skill's own dire
 | **Gate 4** | Assert review SHA matches current HEAD | `scripts/gate-review.sh verify-freshness <record.md>` |
 | **Gate 4** | Dry-run merge check (zero mutations) | `scripts/gate-merge.sh check <mr-iid>` |
 | **Gate 4** | Atomic squash-merge & workspace reset | `scripts/gate-merge.sh merge <mr-iid> --inflight "<files>"` |
+
+---
+
+## Standing Delegation & Subagent Rules
+
+When delegating work to subagents or worker panes:
+1. **Mode by Purpose:** Scouts & Reviewers are strictly `readonly` (terminal report only; no write scope). Mechanics & Implementers get bounded `editable` at Gate 3 only.
+2. **Launch Directory = Write Scope:** The worker must be launched with its `cwd` set to the narrowest directory containing all authorized writes and its report path.
+3. **Mandatory Preflight:** Run `scripts/gate-check.sh --preflight <gate> <mode>` before opening any worker pane.
+4. **Mandatory Teardown:** The supervisor owns the lifecycle of every pane it creates. Capture evidence and close panes immediately after task completion.
+5. **Absolute Worker Invariants:** Workers never commit to `main`, never merge, never force-push, and never tick human acceptance checkboxes. Workers must escalate immediately upon encountering contradictions, missing prerequisites, or scope breach.
 
 ---
 

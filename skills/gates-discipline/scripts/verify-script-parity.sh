@@ -30,6 +30,14 @@ for name in gate-check.sh gate-review.sh gate-merge.sh; do
   fi
 done
 
+# Also guard the ledger template against drift
+ASSETS_DIR="$SCRIPT_DIR/../assets"
+if ! diff -q "$REPO_ROOT/GATES_TEMPLATE.md" "$ASSETS_DIR/GATES_TEMPLATE.md" > /dev/null 2>&1; then
+  echo "DRIFT DETECTED: $ASSETS_DIR/GATES_TEMPLATE.md differs from $REPO_ROOT/GATES_TEMPLATE.md"
+  diff "$REPO_ROOT/GATES_TEMPLATE.md" "$ASSETS_DIR/GATES_TEMPLATE.md" || true
+  DRIFTED=1
+fi
+
 if [ "$DRIFTED" -ne 0 ]; then
   echo "FAIL: bundled skill scripts have drifted from their root originals. Re-sync and re-run."
   exit 1
