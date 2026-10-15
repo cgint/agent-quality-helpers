@@ -55,6 +55,7 @@ Options:
   --strict               Treat warnings as blocking errors (exit 1).
   --json                 Output machine-readable verdict JSON payload.
   --record <file>        Record review verdict and current HEAD SHA into specified artifact.
+  --allow-no-precommit   Allow diff mode to pass even if ./precommit.sh is absent.
   -h, --help             Show this help message.
 
 Exit codes:
@@ -80,12 +81,14 @@ TARGET=""
 STRICT=false
 RECORD_FILE=""
 JSON_OUTPUT=false
+ALLOW_NO_PRECOMMIT=false
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --strict) STRICT=true; shift ;;
     --json) JSON_OUTPUT=true; shift ;;
     --record) RECORD_FILE="$2"; shift 2 ;;
+    --allow-no-precommit) ALLOW_NO_PRECOMMIT=true; shift ;;
     -h|--help) usage 0 ;;
     *) [ -z "$TARGET" ] && TARGET="$1" && shift || shift ;;
   esac
@@ -182,7 +185,12 @@ elif [ "$MODE" = "--diff" ]; then
       pass "(Passed ./precommit.sh)"
     fi
   else
-    warn "(No ./precommit.sh found in repository)"
+    if [ "$ALLOW_NO_PRECOMMIT" = true ]; then
+      warn "(No ./precommit.sh found — allowed via --allow-no-precommit)"
+    else
+      block "(No ./precommit.sh found in repository — precommit check is required; use --allow-no-precommit to override)"
+      OVERALL_STATUS="BLOCK"
+    fi
   fi
 
   # 2. Working Tree & Diff Scope

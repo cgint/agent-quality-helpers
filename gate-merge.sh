@@ -52,6 +52,7 @@ Commands:
 
 Options:
   --allow-dirty                    Allow proceeding with uncommitted in-flight files.
+  --allow-no-precommit             Allow merge to proceed even if ./precommit.sh is absent.
   --inflight "<path1> <path2>..."  Verify named in-flight files survived the switch intact.
   --report <path>                  Write structured merge evidence report to file.
   --target <ref>                   Target branch (default: auto-detected from MR or 'main').
@@ -75,6 +76,7 @@ ALLOW_DIRTY=false
 TARGET_BRANCH=""
 INFLIGHT_FILES=""
 REPORT_PATH=""
+ALLOW_NO_PRECOMMIT=false
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -82,6 +84,7 @@ while [ $# -gt 0 ]; do
     --inflight) INFLIGHT_FILES="$2"; shift 2 ;;
     --report) REPORT_PATH="$2"; shift 2 ;;
     --target) TARGET_BRANCH="$2"; shift 2 ;;
+    --allow-no-precommit) ALLOW_NO_PRECOMMIT=true; shift ;;
     -h|--help) usage 0 ;;
     *) echo "Unknown option: $1"; usage 1 ;;
   esac
@@ -161,6 +164,14 @@ if [ -f "./precommit.sh" ]; then
     echo "--------------------------------------------------"
     exit 1
   }
+else
+  if [ "$ALLOW_NO_PRECOMMIT" = true ]; then
+    printf "${YELLOW}WARN${NC}\n(No ./precommit.sh found — allowed via --allow-no-precommit)\n"
+  else
+    printf "${RED}FAILED${NC}\n\n${RED}ERROR:${NC} No ./precommit.sh found in repository.\n"
+    printf "Precommit check is required before merging. Use --allow-no-precommit to override.\n"
+    exit 1
+  fi
 fi
 
 if [ -f "./openspec-audit.sh" ]; then
@@ -169,6 +180,8 @@ if [ -f "./openspec-audit.sh" ]; then
   if echo "$AUDIT_OUT" | grep -q "RESULT: drift detected"; then
     fail "OpenSpec audit detected drift:\n$AUDIT_OUT"
   fi
+else
+  printf "${YELLOW}WARN${NC}\n(No ./openspec-audit.sh found — skipping OpenSpec drift check)\n"
 fi
 pass "(precommit + audit passed)"
 
